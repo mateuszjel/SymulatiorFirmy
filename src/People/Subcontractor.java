@@ -11,7 +11,7 @@ public class Subcontractor extends Worker {
     }
     private Experience experience;
     public Subcontractor (Experience experience){
-        super();
+        super(WorkerType.PROGRAMMER);
         this.experience = experience;
     }
 

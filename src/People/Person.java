@@ -9,11 +9,13 @@ public class Person {
     final private String[] lastNames = {
             "Woźniak", "Adamczyk", "Madej", "Michalik", "Dziedzic", "Kurek", "Socha", "Bednarek", "Kaczmarek", "Matusiak", "Krawczyk", "Szczepaniak"
     };
-    private String firstName;
-    private String lastName;
+    protected String firstName;
+    protected String lastName;
     public Person(){
         this.firstName = this.firstNames[Random.randInt(0,this.firstNames.length)-1];
         this.lastName = this.lastNames[Random.randInt(0,this.lastNames.length)-1];
     }
-
+    public String toString(){
+        return this.firstName + " " + this.lastName;
+    }
 }
