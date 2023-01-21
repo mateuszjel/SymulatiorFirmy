@@ -1,10 +1,7 @@
-import java.awt.event.KeyEvent;
-import java.io.IOException;
-import java.io.InputStream;
+import Game.Game;
+
 import java.util.Objects;
 import java.util.Scanner;
-import javax.swing.JTextField;
-import javax.swing.*;
 
 
 public class ScreenView {
