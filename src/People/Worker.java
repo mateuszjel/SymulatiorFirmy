@@ -2,9 +2,12 @@ package People;
 
 
 import Game.Game;
+import Game.Random;
 import Game.Project;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 
 public abstract class Worker extends Person{
@@ -16,10 +19,16 @@ public abstract class Worker extends Person{
             return workerTypes[ThreadLocalRandom.current().nextInt(workerTypes.length)];
         }
     }
+    private Map<WorkerType,String> workerTypeText = new HashMap<>(){{
+        put(WorkerType.PROGRAMMER, "programista");
+        put(WorkerType.SELLER, "sprzedawca");
+        put(WorkerType.TESTER, "tester");
+    }};
+
     private WorkerType workerType;
     private ArrayList<Game.Technology> availableTechnologies;
     private Project workingProject;
-    private Game.Game.Technology workingTechnology;
+    private Game.Technology workingTechnology;
     private Integer dailySalary;
 
     public Worker(){
@@ -29,27 +38,39 @@ public abstract class Worker extends Person{
         super();
         this.availableTechnologies = Game.Technology.randomListProbability(30);
         this.workerType = workerType;
-//        this.dailySalary = 320 + (150 +)
+        this.dailySalary = 320 + (150 * Random.randInt(80,100) / 100 * availableTechnologies.size());
     }
 
+    public void setWorkingProject(Project project, Game.Technology technology){
+        if (project.getTechnologies().containsKey(technology)) {
+            this.workingProject = project;
+            this.workingTechnology = technology;
+        }
+    }
+
+    public Project getProject() { return this.workingProject; }
+    public Game.Technology getWorkingTechnology() { return this.workingTechnology; }
     public ArrayList<Game.Technology> getTechnologies(){
         return this.availableTechnologies;
     }
+    public WorkerType getWorkerType(){ return this.workerType; }
+
+    public String getWorkerTypeText(){
+        return this.workerTypeText.get(this.workerType);
+    }
 
     public String toString(){
-        String result = this.firstName + " " + this.lastName;
-        switch (this.workerType){
-            case PROGRAMMER -> {
-                result += ", programista (";
-                for(Game.Technology technology: this.availableTechnologies ){
-                    result += Game.technologiesText.get(technology) + ",";
-                }
-                result.substring(0, result.length()-1);
-                result += ")";
+        StringBuilder result = new StringBuilder(this.firstName + " " + this.lastName);
+        if (this.workerType == WorkerType.PROGRAMMER){
+            result.append(", ").append(this.workerTypeText.get(this.workerType)).append(" (");
+            for(Game.Technology technology: this.availableTechnologies ){
+                result.append(Game.technologiesText.get(technology)).append(",");
             }
-            case SELLER -> { result += ", sprzedawca"; }
-            case TESTER -> { result += ", tester"; }
+            result = new StringBuilder(result.substring(0, result.length()-2));
+            result.append(")");
+        }else{
+            result.append(", ").append(this.workerTypeText.get(this.workerType));
         }
-        return result;
+        return result.toString();
     }
 }

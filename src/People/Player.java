@@ -10,6 +10,8 @@ import java.util.Date;
 
 public class Player extends Person {
     private ArrayList<Subcontractor> subcontractors = new ArrayList<>();
+    private ArrayList<Employee> employees = new ArrayList<>();
+    private ArrayList<Project> projects = new ArrayList<>();
     private boolean searchEmployee = false;
     private Integer searchProject = 0;
     private Integer money = 0;
@@ -31,17 +33,6 @@ public class Player extends Person {
         subcontractors.add(new Subcontractor(Subcontractor.Experience.HIGH));
     }
 
-    public Integer getMoney(){
-        return money;
-    }
-
-//    public ArrayList<Employee> getEmployees(){
-//        ArrayList<Employee> employees = new ArrayList<>();
-//        for (Employee employee: this.employees){
-//            if (employee.)
-//            employees.add(employee);
-//        }
-//    }
 
     public void searchEmployees(){
         if (this.money >= 5000){
@@ -50,17 +41,20 @@ public class Player extends Person {
         }
     }
 
-    public ArrayList<Subcontractor> getSubcontractors(){
-        return this.subcontractors;
+    public void addProject(Project project){
+        this.projects.add(project);
+        project.setPlayer(this);
     }
 
-    public Integer getSearchNewProjectSince(){
-        return this.searchProject;
+    public ArrayList<Employee> getEmployees(){ return new ArrayList<>(this.employees); }
+    public ArrayList<Subcontractor> getSubcontractors(){ return new ArrayList<>(this.subcontractors); }
+    public ArrayList<Game.Technology> getTechnologies(){ return new ArrayList<>(this.technologies); }
+    public ArrayList<Project> getProjects(){ return new ArrayList<>(this.projects); }
+    public Integer getMoney(){
+        return money;
     }
-
-    public void bumpSearchNewProjectSince(){
-        this.searchProject += 1;
-    }
+    public Integer getSearchNewProjectSince(){ return this.searchProject; }
+    public void bumpSearchNewProjectSince(){ this.searchProject += 1; }
 
 //    public Employee resetFindEmployees(){
 //        if (this.findEmployees){

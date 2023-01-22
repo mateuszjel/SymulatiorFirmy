@@ -12,10 +12,15 @@ public class Person {
     protected String firstName;
     protected String lastName;
     public Person(){
-        this.firstName = this.firstNames[Random.randInt(0,this.firstNames.length)-1];
-        this.lastName = this.lastNames[Random.randInt(0,this.lastNames.length)-1];
+        this.firstName = this.firstNames[Random.randInt(0,this.firstNames.length-1)];
+        this.lastName = this.lastNames[Random.randInt(0,this.lastNames.length-1)];
     }
-    public String toString(){
+
+    public String getName(){
         return this.firstName + " " + this.lastName;
+    }
+
+    public String toString(){
+        return this.getName();
     }
 }

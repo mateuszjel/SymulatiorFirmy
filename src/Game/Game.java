@@ -31,9 +31,9 @@ public class Game {
         }
 
         public static ArrayList<Technology> randomListProbability(Integer probability){
-            ArrayList<Technology> technologies = new ArrayList<Technology>();
+            ArrayList<Technology> technologies = new ArrayList<>();
             Integer reducedProbability = 100;
-            while (Random.randBool(probability)){
+            while (Random.randBool(reducedProbability)){
                 Game.Technology technology = Game.Technology.random();
                 if (!technologies.contains(technology)) {
                     technologies.add(technology);
@@ -65,49 +65,45 @@ public class Game {
     }
     public void addPlayer(Player player){
         players.add(player);
-        for( int i = 0; i < 3; i++){
-            projects.add(new Project(Project.LevelType.EASY, currentDate));
-            projects.add(new Project(Project.LevelType.MEDIUM, currentDate));
-            projects.add(new Project(Project.LevelType.HARD, currentDate));
+        projects.add(new Project(Project.LevelType.EASY, currentDate));
+        projects.add(new Project(Project.LevelType.MEDIUM, currentDate));
+        projects.add(new Project(Project.LevelType.HARD, currentDate));
+    }
+
+    public void addPlayerProject(Player player, Project project){
+        if (this.projects.contains(project)) {
+            this.projects.remove(project);
+            player.addProject(project);
+            project.setPlayer(player);
         }
     }
 
-    public ArrayList<Player> getPlayers(){
-        return this.players;
-    }
+    public ArrayList<Player> getPlayers(){ return new ArrayList<>(this.players); }
 
-    public ArrayList<Project> getProjects(){
-        return this.projects;
-    }
+//    public ArrayList<Project> getProjects(){
+//        return this.projects;
+//    }
 
-    public ArrayList<Employee> getPlayerEmployees(Player player){
-        ArrayList<Employee> result = new ArrayList<Employee>();
-        for(Employee employee: this.employees){
-            if(employee.getPlayer().hashCode() == player.hashCode()){
-                result.add(employee);
-            }
-        }
-        return result;
-    }
+//    public ArrayList<Employee> getPlayerEmployees(Player player){
+//        ArrayList<Employee> result = new ArrayList<Employee>();
+//        for(Employee employee: this.employees){
+//            if(employee.getPlayer().hashCode() == player.hashCode()){
+//                result.add(employee);
+//            }
+//        }
+//        return result;
+//    }
 
-    public ArrayList<Project> getPlayerProjects(Player player){
-        ArrayList<Project> result = new ArrayList<Project>();
-        for(Project project: projects){
-            if(project.getPlayer().hashCode() == player.hashCode()){
-                result.add(project);
-            }
-        }
-        return result;
-    }
+//    public ArrayList<Project> getPlayerProjects(Player player){
+//        ArrayList<Project> result = new ArrayList<Project>();
+//        for(Project project: projects){
+//            if(project.getPlayer().hashCode() == player.hashCode()){
+//                result.add(project);
+//            }
+//        }
+//        return result;
+//    }
 
-    public ArrayList<Project> getAvailableProjects(Player player){
-        ArrayList<Project> result = new ArrayList<Project>();
-        for(Project project: projects){
-            if(project.getStatus() == Project.Status.AVAILABLE){
-                result.add(project);
-            }
-        }
-        return result;
-    }
+    public ArrayList<Project> getAvailableProjects(){ return new ArrayList<>(this.projects); }
 
 }

@@ -38,13 +38,14 @@ public class Project<projectLevel> {
     private Integer penalty;
     private Integer price;
     private LevelType level;
-    private Map<Game.Technology, Integer> estimateDays;
+    private Map<Game.Technology, Integer> estimateDays = new HashMap<>();
 //    private Map<Game.Technology, Worker> assignedPeople;
     private Player assignedPlayer;
 
     public Project(Date currentDate){
         this(LevelType.random(), currentDate);
     }
+
     public Project(LevelType level, Date currentDate){
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(currentDate);
@@ -70,7 +71,7 @@ public class Project<projectLevel> {
         this.projectDeadline = new Date(currentDate.getTime() + (1000 * 60 * 60 * 24 * Random.randInt(maxExtimateDays, maxExtimateDays + 10)));
         this.paymentDeadline = new Date(this.projectDeadline.getTime() + (1000 * 60 * 60 * 24 * Random.randInt(1,10)));
         this.price = Random.randInt(maxExtimateDays * 700,maxExtimateDays * 1000);
-        this.penalty = this.price * ( Random.randInt(7,15) / 100 );
+        this.penalty = Random.randInt(7,15);
     }
 
 //    public void assignPerson(Worker worker, Game.Game.Technology technology) throws Exception{
@@ -80,50 +81,48 @@ public class Project<projectLevel> {
 //        this.assignedPeople.put(technology, worker);
 //    }
 
+//    public void setPlayer(Player player){
+//        if (this.assignedPlayer == null){
+//            this.assignedPlayer = player;
+//            this.status = Status.IN_PROGRESS;
+//        }
+//    }
+//    public void setStatus(Status status){
+//        this.status = status;
+//    }
+
     public void setPlayer(Player player){
-        if (this.assignedPlayer == null){
-            this.assignedPlayer = player;
-            this.status = Status.IN_PROGRESS;
+        this.assignedPlayer = player;
+        this.status = Status.IN_PROGRESS;
+    }
+
+    public void workOnProject(Game.Technology technology){
+        if (this.estimateDays.containsKey(technology) && this.estimateDays.get(technology) > 0){
+            this.estimateDays.put(technology, this.estimateDays.get(technology) - 1 );
         }
     }
 
-    public Map<Game.Game.Technology, Integer> getTechnologies(){
-        return this.estimateDays;
-    }
-
+    public Map<Game.Technology, Integer> getTechnologies(){return new HashMap<>(this.estimateDays); }
     public String getName(){
         return this.name;
     }
-
     public Date getProjectDeadline(){
         return this.projectDeadline;
     }
-
     public Date getPaymentDeadline(){
         return this.paymentDeadline;
     }
-
-    public Date getPrice(){
-        return this.paymentDeadline;
-    }
-
-    public Integer getPenalty(){
-        return this.penalty;
-    }
-
-
+    public Integer getPrice(){ return this.price; }
+    public Integer getPenalty(){ return this.penalty; }
     public String getClient(){
         return this.client.toString();
     }
-
     public Status getStatus(){
         return this.status;
     }
-
     public String getStatusText(){
         return this.statusesText.get(this.status);
     }
-
     public Player getPlayer(){
         return this.assignedPlayer;
     }
