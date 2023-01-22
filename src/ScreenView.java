@@ -72,14 +72,17 @@ public class ScreenView {
         System.out.println("3. Przypisz pracownika do projektu lub zacznij programować samemu\n");
         System.out.println("4. Rozpocznij testy kodu\n");
         System.out.println("5. Oddaj projekt klientowi\n");
-        System.out.println("5. Zatrudnij pracownika\n");
+        System.out.println("6. Zatrudnij pracownika\n");
         System.out.println("5. Rozlicz pracowników\n");
         this.footer();
         this.topBottomBorder();
         switch (this.readValue()){
-            case "1" -> { availableProjects(player, ""); }
-            case "2" -> { searchNewProject(player); }
-            case "3" -> { manageHumanResources(player, ""); }
+            case "1" -> { this.availableProjects(player, ""); }
+            case "2" -> { this.searchNewProject(player); }
+            case "3" -> { this.manageHumanResources(player, ""); }
+            case "4" -> { this.startTests(player, ""); }
+            case "5" -> { this.giveFinishedProject(player, ""); }
+            case "6" -> { this.hireNewEmployee(player, ""); }
             default -> {
                 this.playerMenu(player, "Wprowadzono niepoprawną wartość");
             }
@@ -106,7 +109,7 @@ public class ScreenView {
                 System.out.println(i + 1 + ". " + project.getClient() + ", " + project.getName() + " (" + project.getStatusText() + ")");
             }
         }
-        System.out.println(projects.size() + 1 + ". Powrót do menu czynności\n");
+        System.out.println("\n" + (projects.size() + 1) + ". Powrót do menu czynności\n");
         System.out.println("Podaj numer projektu który chcesz podejżeć lub wykonać:");
         this.footer();
         this.topBottomBorder();
@@ -174,7 +177,7 @@ public class ScreenView {
         player.bumpSearchNewProjectSince();
         System.out.println("Poszukujesz nowych zleceń (dzień " + player.getSearchNewProjectSince() + ")...");
         try{
-            Thread.sleep(3000);
+            Thread.sleep(1000);
         }catch (Exception e){
             return;
         }
@@ -186,7 +189,19 @@ public class ScreenView {
         project.workOnProject(technology);
         System.out.println("Pracujesz nad projektem (" + project.getName() + ")...");
         try{
-            Thread.sleep(3000);
+            Thread.sleep(1000);
+        }catch (Exception e){
+            return;
+        }
+    }
+    private void testProject(Project project) {
+        this.clearConsole();
+        this.topBottomBorder();
+        this.header(null,"");
+        project.testProject();
+        System.out.println("Testujesz projekt (" + project.getName() + ")...");
+        try{
+            Thread.sleep(1000);
         }catch (Exception e){
             return;
         }
@@ -259,6 +274,9 @@ public class ScreenView {
                 }
             }
         }
+        if (projects.size() == 0 ){
+            System.out.println("Brak projektów w dostępnych technologiach");
+        }
         System.out.println("\n" + (projects.size() + 1) + ". Powrót do listy pracowników\n");
         this.footer();
         this.topBottomBorder();
@@ -266,8 +284,8 @@ public class ScreenView {
             int number = Integer.parseInt(Objects.requireNonNull(this.readValue()));
             if (number > 0 && number <= projects.size()) {
                 this.workingOnProject((Project) projects.get(number-1).get(0), (Game.Technology) projects.get(number-1).get(1));
-                Project project = (Project) projects.get(number-1).get(0);
-                project.workOnProject((Game.Technology) projects.get(number-1).get(1));
+//                Project project = (Project) projects.get(number-1).get(0);
+//                project.workOnProject((Game.Technology) projects.get(number-1).get(1));
             } else if (number == projects.size() + 1){
                 this.manageHumanResources(player, "");
             }else{
@@ -312,6 +330,9 @@ public class ScreenView {
                 }
             }
         }
+        if (projects.size() == 0 ){
+            System.out.println("Brak projektów w dostępnych technologiach");
+        }
         System.out.println("\n" + (projects.size() + 1) + ". Powrót do listy pracowników\n");
         this.footer();
         this.topBottomBorder();
@@ -354,8 +375,15 @@ public class ScreenView {
         System.out.println("\nAktualnie pracuje nad projektem: " + projectName);
         System.out.println("Zmień lub przypisz nowy projekt:\n");
         for( Project project : player.getProjects()){
+            if (employee.getWorkerType() == Worker.WorkerType.TESTER && project.getStatus() == Project.Status.FINISHED){
+                projects.add(new ArrayList<>(){{
+                    add(project);
+                    add(null);
+                }});
+                System.out.println(projects.size() + ". " + project.getName());
+            }
             for(Object technology : project.getTechnologies().keySet()) {
-                if ( employee.getTechnologies().contains(technology) && (Integer)project.getTechnologies().get(technology) > 0) {
+                if ( employee.getWorkerType() == Worker.WorkerType.PROGRAMMER && employee.getTechnologies().contains(technology) && (Integer)project.getTechnologies().get(technology) > 0) {
                     projects.add(new ArrayList<>(){{
                         add(project);
                         add(technology);
@@ -363,6 +391,9 @@ public class ScreenView {
                     System.out.println(projects.size() + ". " + project.getName() + ", technologia: " + Game.technologiesText.get(technology) + ", pozostało dnii: " + project.getTechnologies().get(technology));
                 }
             }
+        }
+        if (projects.size() == 0 ){
+            System.out.println("Brak projektów w dostępnych technologiach");
         }
         System.out.println("\n" + (projects.size() + 1) + ". Powrót do listy pracowników\n");
         this.footer();
@@ -378,6 +409,150 @@ public class ScreenView {
             }
         }catch (Exception e){
             this.employeeScreen(player,employee,"Podano niepoprawną wartość");
+        }
+    }
+
+    private void startTests(Player player, String message) {
+        ArrayList<Project> projects = new ArrayList<>();
+        this.clearConsole();
+        this.topBottomBorder();
+        this.header( player, message);
+
+        System.out.println("\nWybierz projekt Który checesz przetestować:\n");
+        for( Project project : player.getProjects()){
+            if (project.getStatus() == Project.Status.FINISHED) {
+                projects.add(project);
+                System.out.println(projects.size() + ". " + project.getClient() + ", " + project.getName());
+            }
+        }
+        if (projects.size() == 0 ){
+            System.out.println("Nie ma jeszcze żadnego ukończonego projektu do przetestowania");
+        }
+        System.out.println("\n" + (projects.size() + 1) + ". Powrót do menu czynności\n");
+        this.footer();
+        this.topBottomBorder();
+        try{
+            int number = Integer.parseInt(Objects.requireNonNull(this.readValue()));
+            if (number > 0 && number <= projects.size()) {
+                this.testProject(projects.get(number -1));
+            } else if (number == projects.size() + 1){
+                this.playerMenu(player, "");
+            }else{
+                this.startTests(player,"Podano niepoprawną wartość");
+            }
+        }catch (Exception e){
+            this.startTests(player,"Podano niepoprawną wartość");
+        }
+    }
+
+
+    private void giveFinishedProject(Player player, String message) {
+        ArrayList<Project> projects = new ArrayList<>();
+        this.clearConsole();
+        this.topBottomBorder();
+        this.header( player, message);
+
+        System.out.println("\nWybierz projekt Który checesz oddać:\n");
+        for( Project project : player.getProjects()){
+            if (project.getStatus() == Project.Status.FINISHED) {
+                projects.add(project);
+                System.out.println(projects.size() + ". " + project.getClient() + ", " + project.getName());
+            }
+        }
+        if (projects.size() == 0 ){
+            System.out.println("Nie ma jeszcze żadnego ukończonego projektu do oddania");
+        }
+        System.out.println("\n" + (projects.size() + 1) + ". Powrót do menu czynności\n");
+        this.footer();
+        this.topBottomBorder();
+        try{
+            int number = Integer.parseInt(Objects.requireNonNull(this.readValue()));
+            if (number > 0 && number <= projects.size()) {
+//                TODO: finish project
+//                this.testProject(projects.get(number -1));
+            } else if (number == projects.size() + 1){
+                this.playerMenu(player, "");
+            }else{
+                this.giveFinishedProject(player,"Podano niepoprawną wartość");
+            }
+        }catch (Exception e){
+            this.giveFinishedProject(player,"Podano niepoprawną wartość");
+        }
+    }
+
+    private void hireNewEmployee(Player player, String message) {
+        ArrayList<Employee> employees = player.getEmployees();
+        employees.addAll(game.getAvailableEmployees());
+        this.clearConsole();
+        this.topBottomBorder();
+        this.header(player, message);
+        System.out.println("Posiadania pracownicy:\n\n");
+        for( int i = 0; i < employees.size(); i++){
+            Employee employee = employees.get(i);
+            if (employee.getPlayer() != null) {
+                System.out.println(i + 1 + ". " + employee);
+            }
+        }
+        System.out.println("Dostępne pracownicy na rynku pracy:\n\n");
+        for( int i = 0; i < employees.size(); i++){
+            Employee employee = employees.get(i);
+            if (employee.getPlayer() == null) {
+                System.out.println(i + 1 + ". " + employee);
+            }
+        }
+        System.out.println("\n" + (employees.size() + 1) + ". Powrót do menu czynności\n");
+        System.out.println("Podaj numer pracwnika którego chcesz zwolnić lub zatrudnić:");
+        this.footer();
+        this.topBottomBorder();
+        try{
+            int number = Integer.parseInt(Objects.requireNonNull(this.readValue()));
+            if (number > 0 && number <= employees.size()){
+                this.marketEmployeeScreen(player, employees.get(number - 1), "");
+            }else if (number == employees.size() + 1){
+                this.playerMenu(player, "");
+            }else{
+                this.hireNewEmployee(player,"Podano niepoprawną wartość");
+            }
+        }catch (Exception e){
+            this.hireNewEmployee(player,"Podano niepoprawną wartość");
+        }
+    }
+
+    private void marketEmployeeScreen(Player player, Employee employee, String message) {
+        ArrayList<ArrayList<Object>> projects = new ArrayList<>();
+        this.clearConsole();
+        this.topBottomBorder();
+        this.header(player, message);
+        System.out.println("Pracownik:\n\n" + employee.getName());
+        System.out.println("Typ pracownika: " + employee.getWorkerTypeText());
+        if (employee.getWorkerType() == Worker.WorkerType.PROGRAMMER){
+            StringBuilder technologies = new StringBuilder(new String("  "));
+            System.out.println("Specjalista w technologiach: ");
+            for(Game.Technology technology: employee.getTechnologies()){
+                technologies.append(Game.technologiesText.get(technology)).append(", ");
+            }
+            System.out.println(technologies.subSequence(0,technologies.length()-2));
+        }
+        if (employee.getPlayer() == null) {
+            System.out.println("\n1. Zatrudnij pracownika\n");
+        }else{
+            System.out.println("\n1. Zwolnij pracownika\n");
+        }
+        System.out.println("\n2. Powrót do listy pracowników\n");
+        this.footer();
+        this.topBottomBorder();
+        switch (this.readValue()){
+            case "1" -> {
+                if(employee.getPlayer() == null){
+                    this.game.hireEmployee(player, employee);
+                }else{
+                    this.game.fireEmployee(employee);
+                }
+            }
+            case "2" -> {this.hireNewEmployee(player, "");}
+            default -> {
+                this.employeeScreen(player,employee,"Podano niepoprawną wartość");
+            }
         }
     }
 

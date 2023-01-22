@@ -38,6 +38,7 @@ public class Project<projectLevel> {
     private Integer penalty;
     private Integer price;
     private LevelType level;
+    private Integer testDays;
     private Map<Game.Technology, Integer> estimateDays = new HashMap<>();
 //    private Map<Game.Technology, Worker> assignedPeople;
     private Player assignedPlayer;
@@ -72,6 +73,7 @@ public class Project<projectLevel> {
         this.paymentDeadline = new Date(this.projectDeadline.getTime() + (1000 * 60 * 60 * 24 * Random.randInt(1,10)));
         this.price = Random.randInt(maxExtimateDays * 700,maxExtimateDays * 1000);
         this.penalty = Random.randInt(7,15);
+        this.testDays = 0;
     }
 
 //    public void assignPerson(Worker worker, Game.Game.Technology technology) throws Exception{
@@ -99,6 +101,12 @@ public class Project<projectLevel> {
     public void workOnProject(Game.Technology technology){
         if (this.estimateDays.containsKey(technology) && this.estimateDays.get(technology) > 0){
             this.estimateDays.put(technology, this.estimateDays.get(technology) - 1 );
+        }
+    }
+
+    public void testProject(){
+        if (this.status == Status.FINISHED){
+            this.testDays += 1;
         }
     }
 

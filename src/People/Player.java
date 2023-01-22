@@ -45,6 +45,21 @@ public class Player extends Person {
         this.projects.add(project);
         project.setPlayer(this);
     }
+    public void addEmployee(Employee employee){
+        this.employees.add(employee);
+        employee.setPlayer(this);
+    }
+
+    public void fireEmployee(Employee employee){
+        if (this.employees.contains(employee)){
+            this.employees.remove(employee);
+            employee.setPlayer(null);
+        }
+    }
+
+    public void finishProject(Project project){
+
+    }
 
     public ArrayList<Employee> getEmployees(){ return new ArrayList<>(this.employees); }
     public ArrayList<Subcontractor> getSubcontractors(){ return new ArrayList<>(this.subcontractors); }

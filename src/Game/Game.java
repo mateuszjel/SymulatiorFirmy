@@ -74,12 +74,26 @@ public class Game {
         if (this.projects.contains(project)) {
             this.projects.remove(project);
             player.addProject(project);
-            project.setPlayer(player);
+//            project.setPlayer(player);
+        }
+    }
+
+    public void hireEmployee(Player player, Employee employee){
+        if (this.employees.contains(employee)) {
+            this.employees.remove(employee);
+            player.addEmployee(employee);
+//            project.setPlayer(player);
+        }
+    }
+    public void fireEmployee(Employee employee){
+        if (employee.getPlayer() != null) {
+            this.employees.add(employee);
+            employee.getPlayer().fireEmployee(employee);
         }
     }
 
     public ArrayList<Player> getPlayers(){ return new ArrayList<>(this.players); }
-
+    public Date getCurrentDate(){ return this.currentDate; }
 //    public ArrayList<Project> getProjects(){
 //        return this.projects;
 //    }
@@ -105,5 +119,7 @@ public class Game {
 //    }
 
     public ArrayList<Project> getAvailableProjects(){ return new ArrayList<>(this.projects); }
+    public ArrayList<Employee> getAvailableEmployees(){ return new ArrayList<>(this.employees); }
+
 
 }

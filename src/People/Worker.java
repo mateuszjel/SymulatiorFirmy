@@ -42,9 +42,14 @@ public abstract class Worker extends Person{
     }
 
     public void setWorkingProject(Project project, Game.Technology technology){
-        if (project.getTechnologies().containsKey(technology)) {
+        if (this.workerType == WorkerType.SELLER){
             this.workingProject = project;
-            this.workingTechnology = technology;
+        }else if (this.workerType == WorkerType.PROGRAMMER){
+            if (project.getTechnologies().containsKey(technology)) {
+                this.workingProject = project;
+                this.workingTechnology = technology;
+
+            }
         }
     }
 
