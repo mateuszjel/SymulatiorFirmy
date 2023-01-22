@@ -9,6 +9,10 @@ import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class Game {
+    public static Integer SEARCH_NEW_EMPLOYEE_COST = 1500;
+    public static Integer HIRE_EMPLOYEE_COST = 2000;
+    public static Integer FIRE_EMPLOYEE_COST = 1000;
+    public static Date START_DATE = new GregorianCalendar(2020, Calendar.JANUARY, 1).getTime();
     public enum Technology{
         FRONTEND, BACKEND, DATABASE, MOBILE, WORDPRESS, PRESTASHOP;
         
@@ -53,7 +57,7 @@ public class Game {
         put(Technology.PRESTASHOP, "prestashop");
     }};
 
-    private Date currentDate = new GregorianCalendar(2020, Calendar.JANUARY, 1).getTime();
+    private Date currentDate = new Date(String.valueOf(Game.START_DATE));
     private ArrayList<Player> players = new ArrayList<Player>();
     private ArrayList<Project> projects = new ArrayList<Project>();
     private ArrayList<Employee> employees = new ArrayList<>();
@@ -63,11 +67,17 @@ public class Game {
 //            players.add(new Player());
 //        }
     }
+
+    public void nextDay(Player player){
+        currentDate = new Date(this.currentDate.getTime() + (1000 * 60 * 60 * 24));
+    }
+
     public void addPlayer(Player player){
         players.add(player);
         projects.add(new Project(Project.LevelType.EASY, currentDate));
         projects.add(new Project(Project.LevelType.MEDIUM, currentDate));
         projects.add(new Project(Project.LevelType.HARD, currentDate));
+        employees.add(new Employee());
     }
 
     public void addPlayerProject(Player player, Project project){
@@ -79,16 +89,18 @@ public class Game {
     }
 
     public void hireEmployee(Player player, Employee employee){
-        if (this.employees.contains(employee)) {
+        if (this.employees.contains(employee) && player.getMoney() >= Game.HIRE_EMPLOYEE_COST) {
             this.employees.remove(employee);
             player.addEmployee(employee);
+            player.removeMoney(Game.HIRE_EMPLOYEE_COST);
 //            project.setPlayer(player);
         }
     }
     public void fireEmployee(Employee employee){
-        if (employee.getPlayer() != null) {
+        if (employee.getPlayer() != null && employee.getPlayer().getMoney() >= Game.FIRE_EMPLOYEE_COST) {
             this.employees.add(employee);
             employee.getPlayer().fireEmployee(employee);
+            employee.getPlayer().removeMoney(Game.FIRE_EMPLOYEE_COST);
         }
     }
 

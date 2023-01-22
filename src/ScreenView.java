@@ -46,6 +46,9 @@ public class ScreenView {
         }
         while(true){
             for (Player player: game.getPlayers()){
+                if(this.game.getCurrentDate() != Game.START_DATE){
+                    game.nextDay(player);
+                }
                 this.playerMenu(player, "");
             }
         }
@@ -73,7 +76,7 @@ public class ScreenView {
         System.out.println("4. Rozpocznij testy kodu\n");
         System.out.println("5. Oddaj projekt klientowi\n");
         System.out.println("6. Zatrudnij pracownika\n");
-        System.out.println("5. Rozlicz pracowników\n");
+        System.out.println("7. Rozlicz pracowników\n");
         this.footer();
         this.topBottomBorder();
         switch (this.readValue()){
@@ -82,7 +85,9 @@ public class ScreenView {
             case "3" -> { this.manageHumanResources(player, ""); }
             case "4" -> { this.startTests(player, ""); }
             case "5" -> { this.giveFinishedProject(player, ""); }
-            case "6" -> { this.hireNewEmployee(player, ""); }
+            case "6" -> { this.searchNewEmployees(player); }
+            case "7" -> { this.hireNewEmployee(player, ""); }
+            case "8" -> { this.accounting(player); }
             default -> {
                 this.playerMenu(player, "Wprowadzono niepoprawną wartość");
             }
@@ -182,6 +187,22 @@ public class ScreenView {
             return;
         }
     }
+    private void searchNewEmployees(Player player) {
+        if (player.getMoney() >=  Game.SEARCH_NEW_EMPLOYEE_COST){
+            this.clearConsole();
+            this.topBottomBorder();
+            this.header(null,"");
+            player.searchEmployees();
+            System.out.println("Poszukujesz nowych zleceń (dzień " + player.getSearchNewProjectSince() + ")...");
+            try{
+                Thread.sleep(1000);
+            }catch (Exception e){
+                return;
+            }
+        }else{
+            playerMenu(player, "Brak wystarczającej ilości gotówki");
+        }
+    }
     private void workingOnProject(Project project, Game.Technology technology) {
         this.clearConsole();
         this.topBottomBorder();
@@ -200,6 +221,18 @@ public class ScreenView {
         this.header(null,"");
         project.testProject();
         System.out.println("Testujesz projekt (" + project.getName() + ")...");
+        try{
+            Thread.sleep(1000);
+        }catch (Exception e){
+            return;
+        }
+    }
+    private void accounting(Player player) {
+        this.clearConsole();
+        this.topBottomBorder();
+        this.header(null,"");
+        player.addAccountingDay();
+        System.out.println("Dziś rozliczasz sie z urzędami (dzień: " + player.getAccountingDays() + ")...");
         try{
             Thread.sleep(1000);
         }catch (Exception e){
@@ -534,8 +567,10 @@ public class ScreenView {
             System.out.println(technologies.subSequence(0,technologies.length()-2));
         }
         if (employee.getPlayer() == null) {
+            System.out.println("Koszt zatrudnienia pracownika: " + Game.HIRE_EMPLOYEE_COST + "zł");
             System.out.println("\n1. Zatrudnij pracownika\n");
         }else{
+            System.out.println("Koszt zwolnienia pracownika: " + Game.FIRE_EMPLOYEE_COST + "zł");
             System.out.println("\n1. Zwolnij pracownika\n");
         }
         System.out.println("\n2. Powrót do listy pracowników\n");
@@ -544,9 +579,17 @@ public class ScreenView {
         switch (this.readValue()){
             case "1" -> {
                 if(employee.getPlayer() == null){
-                    this.game.hireEmployee(player, employee);
+                    if(player.getMoney() >= Game.HIRE_EMPLOYEE_COST) {
+                        this.game.hireEmployee(player, employee);
+                    }else{
+                        this.employeeScreen(player,employee,"Brak wystarczającej ilości gotówki");
+                    }
                 }else{
-                    this.game.fireEmployee(employee);
+                    if (player.getMoney() >= Game.FIRE_EMPLOYEE_COST) {
+                        this.game.fireEmployee(employee);
+                    }else{
+                        this.employeeScreen(player,employee,"Brak wystarczającej ilości gotówki");
+                    }
                 }
             }
             case "2" -> {this.hireNewEmployee(player, "");}
@@ -559,7 +602,7 @@ public class ScreenView {
     private void header(Player player, String message){
         System.out.println("        StartupHorror - symulator firmy\n");
         if (player != null){
-            System.out.println("Wybiera gracz: " + player);
+            System.out.println("Wybiera gracz: " + player + ", dzień: " + this.game.getCurrentDate());
         } else if ( !message.equals("") ){
             System.out.println("Uwaga: " + message + "\n\n");
         }else{
