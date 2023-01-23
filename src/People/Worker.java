@@ -1,9 +1,9 @@
 package People;
 
 
-import Game.Game;
-import Game.Random;
-import Game.Project;
+import ConsoleGame.Game;
+import ConsoleGame.Random;
+import ConsoleGame.Project;
 
 import java.util.ArrayList;
 import java.util.HashMap;

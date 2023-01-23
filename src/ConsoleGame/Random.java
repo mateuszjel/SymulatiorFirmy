@@ -1,4 +1,4 @@
-package Game;
+package ConsoleGame;
 
 import java.util.concurrent.ThreadLocalRandom;
 

@@ -1,10 +1,8 @@
-package Game;
+package ConsoleGame;
 
 import People.Employee;
-import People.Person;
 import People.Player;
 
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -58,8 +56,8 @@ public class Game {
     }};
 
     private Date currentDate = new Date(String.valueOf(Game.START_DATE));
-    private ArrayList<Player> players = new ArrayList<Player>();
-    private ArrayList<Project> projects = new ArrayList<Project>();
+    private ArrayList<Player> players = new ArrayList<>();
+    private ArrayList<Project> projects = new ArrayList<>();
     private ArrayList<Employee> employees = new ArrayList<>();
 
     public Game() {
@@ -70,6 +68,20 @@ public class Game {
 
     public void nextDay(Player player){
         currentDate = new Date(this.currentDate.getTime() + (1000 * 60 * 60 * 24));
+        if (player.findEmployee()) {
+            employees.add(new Employee());
+        }
+        if (player.findNewProject()){
+            projects.add(new Project(currentDate));
+        }
+        for(Project project: player.getProjects()){
+            if(project.getStatus() == Project.Status.WAITING_FOR_PAYMENT){
+                project.payment(this.currentDate);
+                if(project.getStatus() == Project.Status.PAID){
+                    player.addMoney(project.getPrice());
+                }
+            }
+        }
     }
 
     public void addPlayer(Player player){
@@ -81,10 +93,11 @@ public class Game {
     }
 
     public void addPlayerProject(Player player, Project project){
-        if (this.projects.contains(project)) {
+        if (this.projects.contains(project) &&
+                (project.getLevel() != Project.LevelType.HARD || player.getEmployees().size() > 0)
+        ) {
             this.projects.remove(project);
             player.addProject(project);
-//            project.setPlayer(player);
         }
     }
 

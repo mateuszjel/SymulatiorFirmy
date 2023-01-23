@@ -1,5 +1,5 @@
-import Game.Game;
-import Game.Project;
+import ConsoleGame.Game;
+import ConsoleGame.Project;
 import People.Employee;
 import People.Player;
 import People.Subcontractor;
@@ -84,7 +84,7 @@ public class ScreenView {
             case "2" -> { this.searchNewProject(player); }
             case "3" -> { this.manageHumanResources(player, ""); }
             case "4" -> { this.startTests(player, ""); }
-            case "5" -> { this.giveFinishedProject(player, ""); }
+            case "5" -> this.giveFinishedProject(player, "");
             case "6" -> { this.searchNewEmployees(player); }
             case "7" -> { this.hireNewEmployee(player, ""); }
             case "8" -> { this.accounting(player); }
@@ -133,6 +133,9 @@ public class ScreenView {
     }
 
     private void projectScreen(Player player, Project project, String message) {
+        Boolean canAcceptProject = project.getStatus() == Project.Status.AVAILABLE && (
+                project.getLevel() != Project.LevelType.HARD || player.getEmployees().size() > 0
+                );
         this.clearConsole();
         this.topBottomBorder();
         this.header(player, message);
@@ -146,7 +149,7 @@ public class ScreenView {
         System.out.println("Termin płatności: " + project.getPaymentDeadline());
         System.out.println("\nCena za wykonanie projektu: " + project.getPrice() + " zł");
         System.out.println("Każdy dzień opóżnienia zminiejsza wartość projektu o: " + project.getPenalty() + " procent\n");
-        if (project.getStatus() == Project.Status.AVAILABLE) {
+        if (canAcceptProject) {
             System.out.println("1. Przyjmij zlecenie\n");
             System.out.println("2. Powrót\n");
         }else{
@@ -154,24 +157,14 @@ public class ScreenView {
         }
         this.footer();
         this.topBottomBorder();
-        if (project.getStatus() == Project.Status.AVAILABLE) {
-            switch (Objects.requireNonNull(this.readValue())){
-                case "1" -> {
-                    game.addPlayerProject(player, project);
-                }
-                case "2" -> {
-                    this.availableProjects(player, "");
-                }
-                default -> {
-                    this.projectScreen(player, project, "Wprowadzono niepoprawną wartość");
-                }
-            }
+
+        String userInput = Objects.requireNonNull(this.readValue());
+        if (userInput == "1" && canAcceptProject){
+            game.addPlayerProject(player, project);
+        }else if ((canAcceptProject && userInput.equals("2")) || (!canAcceptProject && userInput.equals("1"))){
+            this.availableProjects(player, "");
         }else{
-            if ("1".equals(Objects.requireNonNull(this.readValue()))) {
-                this.availableProjects(player, "");
-            } else {
-                this.projectScreen(player, project, "Wprowadzono niepoprawną wartość");
-            }
+            this.projectScreen(player, project, "Wprowadzono niepoprawną wartość");
         }
     }
 
@@ -183,9 +176,7 @@ public class ScreenView {
         System.out.println("Poszukujesz nowych zleceń (dzień " + player.getSearchNewProjectSince() + ")...");
         try{
             Thread.sleep(1000);
-        }catch (Exception e){
-            return;
-        }
+        }catch (Exception ignored){}
     }
     private void searchNewEmployees(Player player) {
         if (player.getMoney() >=  Game.SEARCH_NEW_EMPLOYEE_COST){
@@ -196,9 +187,7 @@ public class ScreenView {
             System.out.println("Poszukujesz nowych zleceń (dzień " + player.getSearchNewProjectSince() + ")...");
             try{
                 Thread.sleep(1000);
-            }catch (Exception e){
-                return;
-            }
+            }catch (Exception ignored){}
         }else{
             playerMenu(player, "Brak wystarczającej ilości gotówki");
         }
@@ -211,9 +200,7 @@ public class ScreenView {
         System.out.println("Pracujesz nad projektem (" + project.getName() + ")...");
         try{
             Thread.sleep(1000);
-        }catch (Exception e){
-            return;
-        }
+        }catch (Exception ignored){}
     }
     private void testProject(Project project) {
         this.clearConsole();
@@ -223,9 +210,7 @@ public class ScreenView {
         System.out.println("Testujesz projekt (" + project.getName() + ")...");
         try{
             Thread.sleep(1000);
-        }catch (Exception e){
-            return;
-        }
+        }catch (Exception ignored){}
     }
     private void accounting(Player player) {
         this.clearConsole();
@@ -235,9 +220,28 @@ public class ScreenView {
         System.out.println("Dziś rozliczasz sie z urzędami (dzień: " + player.getAccountingDays() + ")...");
         try{
             Thread.sleep(1000);
-        }catch (Exception e){
-            return;
+        }catch (Exception ignored){}
+    }
+    private void projectFinished(Project project) {
+        this.clearConsole();
+        this.topBottomBorder();
+        this.header(null,"");
+        System.out.println("Projekt: " + project.getName());
+        System.out.println("Klient: " + project.getClient());
+        if (project.getStatus() == Project.Status.WAITING_FOR_PAYMENT) {
+            if( project.getDaysAfterDeadline() > 0) {
+                System.out.println("\nProjekt został ukończony " + project.getDaysAfterDeadline() + " dni po terminie, udało ci się zarobić: " + project.getPrice() + "zł");
+            }else{
+                System.out.println("\nProjekt został ukończony w terminie, udało ci się zarobić: " + project.getPrice() + "zł");
+            }
+        }else if(project.getStatus() == Project.Status.CANCELED){
+            System.out.println("\nNiestety w projekcie pojawiły się błędy których kient nie był w stanie zaakceptować, klient zrezygnował z projektu");
+        }else if(project.getStatus() == Project.Status.IN_PROGRESS){
+            System.out.println("\nNiestety w projekcie pojawiły się błędy których kient nie był w stanie zaakceptować, poświęć więcej dni na testy aby poprawić błędy i spróbuj ponownie oddać projekt");
         }
+        try{
+            Thread.sleep(1000);
+        }catch (Exception ignored){}
     }
 
     private void manageHumanResources(Player player, String message) {
@@ -248,14 +252,12 @@ public class ScreenView {
         this.topBottomBorder();
         this.header(player, message);
         System.out.println("Posiadani pracownicy:\n\n");
-        for( int i = 0; i < employees.size(); i++){
-            Employee employee = employees.get(i);
+        for (Employee employee : employees) {
             System.out.println(counter + ". " + employee);
             counter += 1;
         }
         System.out.println("Dostępni podwykonawcy:\n\n");
-        for( int i = 0; i < subcontractors.size(); i++){
-            Subcontractor subcontractor = subcontractors.get(i);
+        for (Subcontractor subcontractor : subcontractors) {
             System.out.println(counter + ". " + subcontractor);
             counter += 1;
 
@@ -501,8 +503,8 @@ public class ScreenView {
         try{
             int number = Integer.parseInt(Objects.requireNonNull(this.readValue()));
             if (number > 0 && number <= projects.size()) {
-//                TODO: finish project
-//                this.testProject(projects.get(number -1));
+                player.finishProject(projects.get(number -1), this.game.getCurrentDate());
+
             } else if (number == projects.size() + 1){
                 this.playerMenu(player, "");
             }else{

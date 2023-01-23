@@ -1,6 +1,6 @@
 package People;
 
-import Game.Random;
+import ConsoleGame.Random;
 
 public class Person {
     final private String[] firstNames = {

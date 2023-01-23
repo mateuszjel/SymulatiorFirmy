@@ -1,9 +1,8 @@
 package People;
 
-import Game.Game;
-import Game.Project;
+import ConsoleGame.Game;
+import ConsoleGame.Project;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -41,10 +40,18 @@ public class Player extends Person {
             this.searchEmployee = true;
         }
     }
+    public boolean findEmployee(){
+        if (this.searchEmployee){
+            this.searchEmployee = false;
+            return true;
+        }
+        return false;
+    }
 
     public void addAccountingDay(){
         this.accountingDays += 1;
     }
+
 
     public void addProject(Project project){
         this.projects.add(project);
@@ -54,7 +61,6 @@ public class Player extends Person {
         this.employees.add(employee);
         employee.setPlayer(this);
     }
-
     public void fireEmployee(Employee employee){
         if (this.employees.contains(employee)){
             this.employees.remove(employee);
@@ -71,8 +77,10 @@ public class Player extends Person {
         }
     }
 
-    public void finishProject(Project project){
-
+    public void finishProject(Project project, Date currentDate){
+        if(this.projects.contains(project)){
+            project.finishProject(currentDate);
+        }
     }
 
     public ArrayList<Employee> getAccountingDays(){ return new ArrayList<>(this.employees); }
@@ -80,11 +88,16 @@ public class Player extends Person {
     public ArrayList<Subcontractor> getSubcontractors(){ return new ArrayList<>(this.subcontractors); }
     public ArrayList<Game.Technology> getTechnologies(){ return new ArrayList<>(this.technologies); }
     public ArrayList<Project> getProjects(){ return new ArrayList<>(this.projects); }
-    public Integer getMoney(){
-        return money;
-    }
+    public Integer getMoney(){ return money; }
     public Integer getSearchNewProjectSince(){ return this.searchProject; }
     public void bumpSearchNewProjectSince(){ this.searchProject += 1; }
+    public Boolean findNewProject(){
+        if(this.searchProject >= 5) {
+            this.searchProject -= 5;
+            return true;
+        }
+        return false;
+    }
 
 //    public Employee resetFindEmployees(){
 //        if (this.findEmployees){
