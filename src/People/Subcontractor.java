@@ -1,13 +1,46 @@
 package People;
 
+import ConsoleGame.Project;
+import ConsoleGame.Random;
+
 public class Subcontractor extends Worker {
     public enum Experience {
         LOW, MEDIUM, HIGH,
     }
+
+    public static Integer getDailySalary(Experience experience){
+        switch (experience){
+            case HIGH -> { return 1200; }
+            case MEDIUM -> { return 1000; }
+            case LOW -> { return 800; }
+        }
+        return null;
+    }
+
     private Experience experience;
+
     public Subcontractor (Experience experience){
-        super(WorkerType.PROGRAMMER);
+        super(WorkerType.PROGRAMMER, getDailySalary(experience));
         this.experience = experience;
     }
 
+    public void work(){
+        switch (this.experience){
+            case HIGH -> this.workingProject.workOnProject(this.workingTechnology);
+            case MEDIUM -> {
+                this.workingProject.workOnProject(this.workingTechnology);
+                if(Random.randBool(10)){
+                    this.workingProject.requireFix(1);
+                }
+            }
+            case LOW -> {
+                if(Random.randBool(80)){
+                    this.workingProject.workOnProject(this.workingTechnology);
+                }
+                if(Random.randBool(20)){
+                    this.workingProject.requireFix(1);
+                }
+            }
+        }
+    }
 }

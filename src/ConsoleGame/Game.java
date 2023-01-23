@@ -2,6 +2,8 @@ package ConsoleGame;
 
 import People.Employee;
 import People.Player;
+import People.Subcontractor;
+import People.Worker;
 
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
@@ -67,6 +69,8 @@ public class Game {
     }
 
     public void nextDay(Player player){
+        //TODO dodać sprawdzenie księgowości oraz dni wolne
+        //TODO dodać choroby i game over
         currentDate = new Date(this.currentDate.getTime() + (1000 * 60 * 60 * 24));
         if (player.findEmployee()) {
             employees.add(new Employee());
@@ -80,6 +84,22 @@ public class Game {
                 if(project.getStatus() == Project.Status.PAID){
                     player.addMoney(project.getPrice());
                 }
+            }
+        }
+        for(Employee employee: player.getEmployees()){
+            if(employee.getWorkingProject() != null){
+                switch (employee.getWorkerType()){
+                    case PROGRAMMER -> employee.work();
+                    case TESTER -> employee.getWorkingProject().testProject();
+                }
+            }else if(employee.getWorkerType() == Worker.WorkerType.SELLER){
+                player.bumpSearchNewProjectSince();
+            }
+        }
+        for(Subcontractor subcontractor: player.getSubcontractors()){
+            if(subcontractor.getWorkingProject() != null){
+                subcontractor.work();
+                player.removeMoney(subcontractor.getDailySalary());
             }
         }
     }

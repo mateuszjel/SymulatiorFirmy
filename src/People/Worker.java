@@ -8,6 +8,7 @@ import ConsoleGame.Project;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
 
 public abstract class Worker extends Person{
@@ -27,42 +28,43 @@ public abstract class Worker extends Person{
 
     private WorkerType workerType;
     private ArrayList<Game.Technology> availableTechnologies;
-    private Project workingProject;
-    private Game.Technology workingTechnology;
+    protected Project workingProject;
+    protected Game.Technology workingTechnology;
     private Integer dailySalary;
 
     public Worker(){
-        this(WorkerType.random());
+        this(WorkerType.random(), null);
     }
-    public Worker(WorkerType workerType){
+
+    public Worker(WorkerType workerType, Integer dailySalary){
         super();
         this.availableTechnologies = Game.Technology.randomListProbability(30);
         this.workerType = workerType;
-        this.dailySalary = 320 + (150 * Random.randInt(80,100) / 100 * availableTechnologies.size());
+        this.dailySalary = Objects.requireNonNullElseGet(dailySalary, () -> 320 + (150 * Random.randInt(80, 100) / 100 * availableTechnologies.size()));
     }
 
     public void setWorkingProject(Project project, Game.Technology technology){
-        if (this.workerType == WorkerType.SELLER){
+        if (this.workerType == WorkerType.TESTER){
             this.workingProject = project;
         }else if (this.workerType == WorkerType.PROGRAMMER){
             if (project.getTechnologies().containsKey(technology)) {
                 this.workingProject = project;
                 this.workingTechnology = technology;
-
             }
         }
     }
 
+    public Integer getDailySalary() { return this.dailySalary; }
     public Project getProject() { return this.workingProject; }
     public Game.Technology getWorkingTechnology() { return this.workingTechnology; }
     public ArrayList<Game.Technology> getTechnologies(){
         return this.availableTechnologies;
     }
     public WorkerType getWorkerType(){ return this.workerType; }
-
     public String getWorkerTypeText(){
         return this.workerTypeText.get(this.workerType);
     }
+    public Project getWorkingProject() { return this.workingProject;};
 
     public String toString(){
         StringBuilder result = new StringBuilder(this.firstName + " " + this.lastName);
@@ -78,4 +80,6 @@ public abstract class Worker extends Person{
         }
         return result.toString();
     }
+
+    public abstract void work();
 }

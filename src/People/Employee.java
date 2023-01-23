@@ -1,5 +1,7 @@
 package People;
 
+import ConsoleGame.Random;
+
 public class Employee extends  Worker{
 
     private Player employer;
@@ -16,5 +18,7 @@ public class Employee extends  Worker{
         return this.employer;
     }
 
-
+    public void work(){
+        this.workingProject.workOnProject(this.workingTechnology);
+    }
 }

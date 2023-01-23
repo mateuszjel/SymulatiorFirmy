@@ -90,7 +90,7 @@ public class Project {
         return maxEstimateDays;
     }
     private Boolean workingCorrectly(){
-        return Random.randBool(this.testDays * 2 / getMaxEstimateDays() * 80);
+        return Random.randBool(this.getTestDays() * 2 / getMaxEstimateDays() * 80);
     }
 
     public void setPlayer(Player player){
@@ -132,6 +132,16 @@ public class Project {
                 this.status = Status.PAID;
             }
         }
+    }
+
+    public Integer getTestDays() {
+        if(this.testDays < 0 ){
+            return 0;
+        }
+        return testDays;
+    }
+    public void requireFix(Integer days){
+        this.testDays -= days;
     }
 
     public Map<Game.Technology, Integer> getTechnologies(){return new HashMap<>(this.estimateDays); }
