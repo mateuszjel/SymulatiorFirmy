@@ -9,6 +9,10 @@ import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class Game {
+    public enum GAME_STATUS{
+        CONTINUE, ZUS_INSPECTION, MONEY_LEFT, FINISHED
+    }
+    public static Integer PLAYER_START_MONEY=10000;
     public static Integer SEARCH_NEW_EMPLOYEE_COST = 1500;
     public static Integer HIRE_EMPLOYEE_COST = 2000;
     public static Integer FIRE_EMPLOYEE_COST = 1000;
@@ -57,21 +61,34 @@ public class Game {
         put(Technology.PRESTASHOP, "prestashop");
     }};
 
-    private Date currentDate = new Date(String.valueOf(Game.START_DATE));
+    private Date currentDate = new Date(Game.START_DATE.getTime());
     private ArrayList<Player> players = new ArrayList<>();
     private ArrayList<Project> projects = new ArrayList<>();
     private ArrayList<Employee> employees = new ArrayList<>();
 
     public Game() {
-//        for(int i = 0; i < userCount; i++){
-//            players.add(new Player());
-//        }
+    }
+    public void gameNextDay(){
+        currentDate = new Date(this.currentDate.getTime() + (1000 * 60 * 60 * 24));
     }
 
-    public void nextDay(Player player){
-        //TODO dodać sprawdzenie księgowości oraz dni wolne
-        //TODO dodać choroby i game over
-        currentDate = new Date(this.currentDate.getTime() + (1000 * 60 * 60 * 24));
+    public GAME_STATUS playerNextDay(Player player){
+        Calendar calendar = new GregorianCalendar();
+        calendar.setTime(this.currentDate);
+        if(player.getVictoryProjects() >=3 && player.getMoney() > Game.PLAYER_START_MONEY){
+            this.players.remove(player);
+            return GAME_STATUS.FINISHED;
+        }
+        if(calendar.get(Calendar.DAY_OF_MONTH) == 1){
+            if(!player.checkAccounting()){
+                this.players.remove(player);
+                return GAME_STATUS.ZUS_INSPECTION;
+            }
+            for(Employee employee: player.getEmployees()){
+                player.removeMoney(employee.getDaysWorked() * employee.getDailySalary());
+                employee.resetDaysWorked();
+            }
+        }
         if (player.findEmployee()) {
             employees.add(new Employee());
         }
@@ -86,22 +103,31 @@ public class Game {
                 }
             }
         }
-        for(Employee employee: player.getEmployees()){
-            if(employee.getWorkingProject() != null){
-                switch (employee.getWorkerType()){
-                    case PROGRAMMER -> employee.work();
-                    case TESTER -> employee.getWorkingProject().testProject();
+        if(calendar.get(Calendar.DAY_OF_WEEK) != Calendar.SATURDAY && calendar.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY) {
+            for (Employee employee : player.getEmployees()) {
+                if(employee.getWorkerType() == Worker.WorkerType.SELLER){
+                    employee.searchNewProjects();
+                }if (employee.getWorkingProject() != null) {
+                    switch (employee.getWorkerType()) {
+                        case PROGRAMMER -> employee.work();
+                        case TESTER -> employee.test();
+                    }
+                } else if (employee.getWorkerType() == Worker.WorkerType.SELLER) {
+                    player.bumpSearchNewProjectSince();
                 }
-            }else if(employee.getWorkerType() == Worker.WorkerType.SELLER){
-                player.bumpSearchNewProjectSince();
+            }
+            for (Subcontractor subcontractor : player.getSubcontractors()) {
+                if (subcontractor.getWorkingProject() != null) {
+                    subcontractor.work();
+                    player.removeMoney(subcontractor.getDailySalary());
+                }
             }
         }
-        for(Subcontractor subcontractor: player.getSubcontractors()){
-            if(subcontractor.getWorkingProject() != null){
-                subcontractor.work();
-                player.removeMoney(subcontractor.getDailySalary());
-            }
+        if (player.getMoney() <=0){
+            this.players.remove(player);
+            return GAME_STATUS.MONEY_LEFT;
         }
+        return GAME_STATUS.CONTINUE;
     }
 
     public void addPlayer(Player player){
@@ -126,7 +152,6 @@ public class Game {
             this.employees.remove(employee);
             player.addEmployee(employee);
             player.removeMoney(Game.HIRE_EMPLOYEE_COST);
-//            project.setPlayer(player);
         }
     }
     public void fireEmployee(Employee employee){
@@ -139,29 +164,6 @@ public class Game {
 
     public ArrayList<Player> getPlayers(){ return new ArrayList<>(this.players); }
     public Date getCurrentDate(){ return this.currentDate; }
-//    public ArrayList<Project> getProjects(){
-//        return this.projects;
-//    }
-
-//    public ArrayList<Employee> getPlayerEmployees(Player player){
-//        ArrayList<Employee> result = new ArrayList<Employee>();
-//        for(Employee employee: this.employees){
-//            if(employee.getPlayer().hashCode() == player.hashCode()){
-//                result.add(employee);
-//            }
-//        }
-//        return result;
-//    }
-
-//    public ArrayList<Project> getPlayerProjects(Player player){
-//        ArrayList<Project> result = new ArrayList<Project>();
-//        for(Project project: projects){
-//            if(project.getPlayer().hashCode() == player.hashCode()){
-//                result.add(project);
-//            }
-//        }
-//        return result;
-//    }
 
     public ArrayList<Project> getAvailableProjects(){ return new ArrayList<>(this.projects); }
     public ArrayList<Employee> getAvailableEmployees(){ return new ArrayList<>(this.employees); }

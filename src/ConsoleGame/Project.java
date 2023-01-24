@@ -32,6 +32,12 @@ public class Project {
             put(Status.PAID, "faktura opłacona");
             put(Status.CANCELED, "anulowany");
     }};
+    private Map<LevelType, String> levelsText = new HashMap<>(){{
+        put(LevelType.EASY, "prosty");
+        put(LevelType.MEDIUM, "średni");
+        put(LevelType.HARD, "złożony");
+    }};
+    private Boolean countedToVictory = false;
     private String name;
     private Status status;
     private Client client;
@@ -58,7 +64,10 @@ public class Project {
         switch (level){
             case EASY -> {technologiesCount = 1;}
             case MEDIUM -> {technologiesCount = 2;}
-            case HARD -> {technologiesCount = Random.randInt(3, Game.Technology.values().length);}
+            case HARD -> {
+                technologiesCount = Random.randInt(3, Game.Technology.values().length);
+                this.countedToVictory = true;
+            }
         }
 //        ArrayList<Game.Technology> technologies = Game.Technology.randomList(technologiesCount);
         for( Game.Technology technology: Game.Technology.randomList(technologiesCount) ){
@@ -130,6 +139,9 @@ public class Project {
             this.paymentDeadline = new Date(this.projectDeadline.getTime() + (1000 * 60 * 60 * 24 * paymentLateDays));
             if(paymentLateDays == 0){
                 this.status = Status.PAID;
+                if(this.countedToVictory){
+                    this.assignedPlayer.addVictoryProjects();
+                }
             }
         }
     }
@@ -143,6 +155,9 @@ public class Project {
     public void requireFix(Integer days){
         this.testDays -= days;
     }
+    public void removeFromVictory(){
+        this.countedToVictory = false;
+    }
 
     public Map<Game.Technology, Integer> getTechnologies(){return new HashMap<>(this.estimateDays); }
     public String getName(){ return this.name; }
@@ -155,5 +170,6 @@ public class Project {
     public String getClient(){ return this.client.toString(); }
     public Status getStatus(){ return this.status; }
     public String getStatusText(){ return this.statusesText.get(this.status); }
+    public String getLevelText(){ return this.levelsText.get(this.level); }
     public Player getPlayer(){ return this.assignedPlayer; }
 }

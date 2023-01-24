@@ -37,7 +37,7 @@ public class ScreenView {
         Integer userCount = 0;
         try{
             this.game = new Game();
-            userCount = Integer.parseInt(Objects.requireNonNull(this.readValue()));
+            userCount = Integer.parseInt(this.readValue());
         }catch (Exception e){
             this.insertUserCount("Podano niepoprawną wartość");
         }
@@ -46,11 +46,21 @@ public class ScreenView {
         }
         while(true){
             for (Player player: game.getPlayers()){
-                if(this.game.getCurrentDate() != Game.START_DATE){
-                    game.nextDay(player);
+                if(this.game.getCurrentDate().getTime() != Game.START_DATE.getTime()){
+                    switch (game.playerNextDay(player)){
+                        case ZUS_INSPECTION -> this.playerGameEnd(player,"ZUS wykonał inspekcje, twoje długi przerosły twój budżet");
+                        case MONEY_LEFT -> this.playerGameEnd(player,"Ilość twojej gotówki spadła poniżej 0");
+                        case FINISHED -> this.playerGameEnd(player,"Udało ci się wykonać 3 duże projekty, gra skończona");
+                        case CONTINUE -> this.playerMenu(player,"");
+                    }
+                    if(game.getPlayers().size()==0){
+                        System.exit(0);
+                    }
+                }else{
+                    this.playerMenu(player, "");
                 }
-                this.playerMenu(player, "");
             }
+            this.game.gameNextDay();
         }
     }
 
@@ -75,8 +85,9 @@ public class ScreenView {
         System.out.println("3. Przypisz pracownika do projektu lub zacznij programować samemu\n");
         System.out.println("4. Rozpocznij testy kodu\n");
         System.out.println("5. Oddaj projekt klientowi\n");
-        System.out.println("6. Zatrudnij pracownika\n");
-        System.out.println("7. Rozlicz pracowników\n");
+        System.out.println("6. Szukaj nowych pracowników\n");
+        System.out.println("7. Zatrudnij pracownika\n");
+        System.out.println("8. Rozlicz pracowników\n");
         this.footer();
         this.topBottomBorder();
         switch (this.readValue()){
@@ -111,7 +122,7 @@ public class ScreenView {
         for( int i = 0; i < projects.size(); i++){
             Project project = projects.get(i);
             if (project.getStatus() == Project.Status.AVAILABLE) {
-                System.out.println(i + 1 + ". " + project.getClient() + ", " + project.getName() + " (" + project.getStatusText() + ")");
+                System.out.println(i + 1 + ". " + project.getClient() + ", " + project.getName() + " (" + project.getStatusText() + ", " + project.getLevelText() + ")");
             }
         }
         System.out.println("\n" + (projects.size() + 1) + ". Powrót do menu czynności\n");
@@ -159,7 +170,7 @@ public class ScreenView {
         this.topBottomBorder();
 
         String userInput = Objects.requireNonNull(this.readValue());
-        if (userInput == "1" && canAcceptProject){
+        if (userInput.equals("1") && canAcceptProject){
             game.addPlayerProject(player, project);
         }else if ((canAcceptProject && userInput.equals("2")) || (!canAcceptProject && userInput.equals("1"))){
             this.availableProjects(player, "");
@@ -168,6 +179,15 @@ public class ScreenView {
         }
     }
 
+    private void playerGameEnd(Player player, String message) {
+        this.clearConsole();
+        this.topBottomBorder();
+        this.header(null,"");
+        System.out.println("message");
+        try{
+            Thread.sleep(3000);
+        }catch (Exception ignored){}
+    }
     private void searchNewProject(Player player) {
         this.clearConsole();
         this.topBottomBorder();
@@ -184,7 +204,7 @@ public class ScreenView {
             this.topBottomBorder();
             this.header(null,"");
             player.searchEmployees();
-            System.out.println("Poszukujesz nowych zleceń (dzień " + player.getSearchNewProjectSince() + ")...");
+            System.out.println("Poszukujesz nowych pracowników...");
             try{
                 Thread.sleep(1000);
             }catch (Exception ignored){}
@@ -192,21 +212,21 @@ public class ScreenView {
             playerMenu(player, "Brak wystarczającej ilości gotówki");
         }
     }
-    private void workingOnProject(Project project, Game.Technology technology) {
+    private void workingOnProject(Player player, Project project, Game.Technology technology) {
         this.clearConsole();
         this.topBottomBorder();
         this.header(null,"");
-        project.workOnProject(technology);
+        player.work(project, technology);
         System.out.println("Pracujesz nad projektem (" + project.getName() + ")...");
         try{
             Thread.sleep(1000);
         }catch (Exception ignored){}
     }
-    private void testProject(Project project) {
+    private void testProject(Player player, Project project) {
         this.clearConsole();
         this.topBottomBorder();
         this.header(null,"");
-        project.testProject();
+        player.test(project);
         System.out.println("Testujesz projekt (" + project.getName() + ")...");
         try{
             Thread.sleep(1000);
@@ -318,7 +338,7 @@ public class ScreenView {
         try{
             int number = Integer.parseInt(Objects.requireNonNull(this.readValue()));
             if (number > 0 && number <= projects.size()) {
-                this.workingOnProject((Project) projects.get(number-1).get(0), (Game.Technology) projects.get(number-1).get(1));
+                this.workingOnProject(player, (Project) projects.get(number-1).get(0), (Game.Technology) projects.get(number-1).get(1));
 //                Project project = (Project) projects.get(number-1).get(0);
 //                project.workOnProject((Game.Technology) projects.get(number-1).get(1));
             } else if (number == projects.size() + 1){
@@ -469,7 +489,7 @@ public class ScreenView {
         try{
             int number = Integer.parseInt(Objects.requireNonNull(this.readValue()));
             if (number > 0 && number <= projects.size()) {
-                this.testProject(projects.get(number -1));
+                this.testProject(player, projects.get(number -1));
             } else if (number == projects.size() + 1){
                 this.playerMenu(player, "");
             }else{
@@ -504,7 +524,7 @@ public class ScreenView {
             int number = Integer.parseInt(Objects.requireNonNull(this.readValue()));
             if (number > 0 && number <= projects.size()) {
                 player.finishProject(projects.get(number -1), this.game.getCurrentDate());
-
+                this.projectFinished(projects.get(number -1));
             } else if (number == projects.size() + 1){
                 this.playerMenu(player, "");
             }else{
@@ -604,7 +624,7 @@ public class ScreenView {
     private void header(Player player, String message){
         System.out.println("        StartupHorror - symulator firmy\n");
         if (player != null){
-            System.out.println("Wybiera gracz: " + player + ", dzień: " + this.game.getCurrentDate());
+            System.out.println("Wybiera gracz: " + player + ", dzień: " + this.game.getCurrentDate() + ",stan konta: " + player.getMoney() + "zł");
         } else if ( !message.equals("") ){
             System.out.println("Uwaga: " + message + "\n\n");
         }else{

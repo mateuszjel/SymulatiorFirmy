@@ -11,6 +11,7 @@ public class Player extends Person {
     private ArrayList<Subcontractor> subcontractors = new ArrayList<>();
     private ArrayList<Employee> employees = new ArrayList<>();
     private ArrayList<Project> projects = new ArrayList<>();
+    private Integer victoryProjects = 0;
     private Integer accountingDays = 0;
     private boolean searchEmployee = false;
     private Integer searchProject = 0;
@@ -26,6 +27,7 @@ public class Player extends Person {
     );
 
     public Player(String userName){
+        this.money = Game.PLAYER_START_MONEY;
         this.firstName = userName;
         this.lastName = "";
         subcontractors.add(new Subcontractor(Subcontractor.Experience.LOW));
@@ -51,6 +53,7 @@ public class Player extends Person {
     public void addAccountingDay(){
         this.accountingDays += 1;
     }
+    public void addVictoryProjects(){ this.victoryProjects += 1;}
 
 
     public void addProject(Project project){
@@ -82,8 +85,25 @@ public class Player extends Person {
             project.finishProject(currentDate);
         }
     }
+    public boolean checkAccounting() {
+        if(this.accountingDays < 2){
+            return false;
+        }
+        this.accountingDays = 0;
+        return true;
+    }
 
-    public ArrayList<Employee> getAccountingDays(){ return new ArrayList<>(this.employees); }
+    public void work(Project project, Game.Technology technology){
+        project.workOnProject(technology);
+        project.removeFromVictory();
+    }
+    public void test(Project project){
+        project.testProject();
+        project.removeFromVictory();
+    }
+
+    public Integer getVictoryProjects() {return this.victoryProjects;}
+    public Integer getAccountingDays(){ return this.accountingDays; }
     public ArrayList<Employee> getEmployees(){ return new ArrayList<>(this.employees); }
     public ArrayList<Subcontractor> getSubcontractors(){ return new ArrayList<>(this.subcontractors); }
     public ArrayList<Game.Technology> getTechnologies(){ return new ArrayList<>(this.technologies); }
