@@ -69,7 +69,7 @@ public class Game {
     public Game() {
     }
     public void gameNextDay(){
-        currentDate = new Date(this.currentDate.getTime() + (1000 * 60 * 60 * 24));
+        currentDate = new Date(this.currentDate.getTime() + (1000L * (long) (60 * 60 * 24)));
     }
 
     public GAME_STATUS playerNextDay(Player player){
@@ -118,8 +118,9 @@ public class Game {
             }
             for (Subcontractor subcontractor : player.getSubcontractors()) {
                 if (subcontractor.getWorkingProject() != null) {
-                    subcontractor.work();
-                    player.removeMoney(subcontractor.getDailySalary());
+                    if ( subcontractor.work()) {
+                        player.removeMoney(subcontractor.getDailySalary());
+                    }
                 }
             }
         }

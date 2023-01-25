@@ -81,5 +81,5 @@ public abstract class Worker extends Person{
         return result.toString();
     }
 
-    public abstract void work();
+    public abstract Boolean work();
 }

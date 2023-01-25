@@ -248,20 +248,23 @@ public class ScreenView {
         this.header(null,"");
         System.out.println("Projekt: " + project.getName());
         System.out.println("Klient: " + project.getClient());
-        if (project.getStatus() == Project.Status.WAITING_FOR_PAYMENT) {
-            if( project.getDaysAfterDeadline() > 0) {
-                System.out.println("\nProjekt został ukończony " + project.getDaysAfterDeadline() + " dni po terminie, udało ci się zarobić: " + project.getPrice() + "zł");
-            }else{
-                System.out.println("\nProjekt został ukończony w terminie, udało ci się zarobić: " + project.getPrice() + "zł");
+        switch (project.getStatus()){
+            case WAITING_FOR_PAYMENT -> {
+                if( project.getDaysAfterDeadline() > 0) {
+                    System.out.println("\nProjekt został ukończony " + project.getDaysAfterDeadline() + " dni po terminie, udało ci się zarobić: " + project.getPrice() + "zł");
+                }else{
+                    System.out.println("\nProjekt został ukończony w terminie, udało ci się zarobić: " + project.getPrice() + "zł");
+                }
             }
-        }else if(project.getStatus() == Project.Status.CANCELED){
-            System.out.println("\nNiestety w projekcie pojawiły się błędy których kient nie był w stanie zaakceptować, klient zrezygnował z projektu");
-        }else if(project.getStatus() == Project.Status.IN_PROGRESS){
-            System.out.println("\nNiestety w projekcie pojawiły się błędy których kient nie był w stanie zaakceptować, poświęć więcej dni na testy aby poprawić błędy i spróbuj ponownie oddać projekt");
+            case CANCELED -> System.out.println("\nNiestety w projekcie pojawiły się błędy których kient nie był w stanie zaakceptować, klient zrezygnował z projektu");
+            case FINISHED -> System.out.println("\nNiestety w projekcie pojawiły się błędy których kient nie był w stanie zaakceptować, poświęć więcej dni na testy aby poprawić błędy i spróbuj ponownie oddać projekt");
         }
+
         try{
             Thread.sleep(1000);
-        }catch (Exception ignored){}
+        }catch (Exception e){
+            System.out.println(e);
+        }
     }
 
     private void manageHumanResources(Player player, String message) {
@@ -455,7 +458,7 @@ public class ScreenView {
         this.topBottomBorder();
         try{
             int number = Integer.parseInt(Objects.requireNonNull(this.readValue()));
-            if (number > 0 && number < projects.size()) {
+            if (number > 0 && number <= projects.size()) {
                 employee.setWorkingProject((Project) projects.get(number-1).get(0),(Game.Technology) projects.get(number-1).get(1));
             } else if (number == projects.size() + 1){
                 this.manageHumanResources(player, "");

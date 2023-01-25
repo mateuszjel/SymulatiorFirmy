@@ -25,11 +25,15 @@ public class Employee extends  Worker{
         this.daysWorked = 0;
     }
 
-    public void work(){
+    public Boolean work(){
         if(Random.randBool(95)) {
-            this.daysWorked += 1;
-            this.workingProject.workOnProject(this.workingTechnology);
+            if (this.workingProject.workOnProject(this.workingTechnology)){
+                this.daysWorked += 1;
+                return true;
+            }
+            return false;
         }
+        return true;
     }
     public void test(){
         if(Random.randBool(95)) {

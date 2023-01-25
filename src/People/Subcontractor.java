@@ -24,23 +24,25 @@ public class Subcontractor extends Worker {
         this.experience = experience;
     }
 
-    public void work(){
+    public Boolean work(){
         switch (this.experience){
-            case HIGH -> this.workingProject.workOnProject(this.workingTechnology);
+            case HIGH -> { return this.workingProject.workOnProject(this.workingTechnology); }
             case MEDIUM -> {
-                this.workingProject.workOnProject(this.workingTechnology);
                 if(Random.randBool(10)){
                     this.workingProject.requireFix(1);
                 }
+                return this.workingProject.workOnProject(this.workingTechnology);
             }
             case LOW -> {
                 if(Random.randBool(80)){
-                    this.workingProject.workOnProject(this.workingTechnology);
+                    return this.workingProject.workOnProject(this.workingTechnology);
                 }
                 if(Random.randBool(20)){
                     this.workingProject.requireFix(1);
                 }
+                return true;
             }
         }
+        return null;
     }
 }
