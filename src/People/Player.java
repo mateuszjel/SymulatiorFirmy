@@ -75,9 +75,7 @@ public class Player extends Person {
         this.money += money;
     }
     public void removeMoney(Integer money){
-        if(this.money >= money) {
-            this.money -= money;
-        }
+        this.money -= money;
     }
 
     public void finishProject(Project project, Date currentDate){

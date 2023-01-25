@@ -183,7 +183,7 @@ public class ScreenView {
         this.clearConsole();
         this.topBottomBorder();
         this.header(null,"");
-        System.out.println("message");
+        System.out.println(message);
         try{
             Thread.sleep(3000);
         }catch (Exception ignored){}
@@ -261,7 +261,7 @@ public class ScreenView {
         }
 
         try{
-            Thread.sleep(1000);
+            Thread.sleep(10000);
         }catch (Exception e){
             System.out.println(e);
         }
@@ -628,7 +628,8 @@ public class ScreenView {
         System.out.println("        StartupHorror - symulator firmy\n");
         if (player != null){
             System.out.println("Wybiera gracz: " + player + ", dzień: " + this.game.getCurrentDate() + ",stan konta: " + player.getMoney() + "zł");
-        } else if ( !message.equals("") ){
+        }
+        if ( !message.equals("") ){
             System.out.println("Uwaga: " + message + "\n\n");
         }else{
             System.out.println();
